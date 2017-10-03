@@ -1,4 +1,4 @@
-package com.example.dennis.testapp;
+package com.example.dennis.testapp.SearchConsole;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;

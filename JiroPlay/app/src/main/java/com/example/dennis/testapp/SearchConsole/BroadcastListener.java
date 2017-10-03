@@ -1,18 +1,15 @@
-package com.example.dennis.testapp;
+package com.example.dennis.testapp.SearchConsole;
 
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Properties;
 
 class BroadcastListener extends AsyncTask<String, String, String>
 {
