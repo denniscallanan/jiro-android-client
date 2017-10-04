@@ -10,8 +10,10 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
+import com.example.dennis.testapp.GameStore.GameStore;
 import com.example.dennis.testapp.LoginScreen.LoginScreen;
 import com.example.dennis.testapp.R;
+import com.facebook.AccessToken;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,8 +45,12 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                Intent i = new Intent(context, LoginScreen.class);
-                startActivity(i);
+                if(isLoggedIn()){
+                    gotoGameStore();
+                }else{
+                    Intent i = new Intent(context, LoginScreen.class);
+                    startActivity(i);
+                }
             }
         });
 
@@ -58,7 +64,16 @@ public class MainActivity extends AppCompatActivity
 
         new BroadcastListener(serverList, serversAdapter, serverListView, this, SearchSocket.getSocket(), seenIps, spinner).execute();
 
-        Intent i = new Intent(this, LoginScreen.class);
+
+    }
+
+    public boolean isLoggedIn() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        return accessToken != null;
+    }
+
+    public void gotoGameStore(){
+        Intent i = new Intent(this, GameStore.class);
         startActivity(i);
     }
 }
