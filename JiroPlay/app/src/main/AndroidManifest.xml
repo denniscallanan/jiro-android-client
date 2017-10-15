@@ -24,7 +24,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".LoginScreen.LoginScreen" />
         <activity android:name=".GameStore.GameStore"></activity>
     </application>
 

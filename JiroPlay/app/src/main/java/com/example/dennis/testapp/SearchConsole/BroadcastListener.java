@@ -88,7 +88,7 @@ class BroadcastListener extends AsyncTask<String, String, String>
                     if(!seen.containsKey(data[1])){
                         if(seen.size() == 0){
                             spinner.setVisibility(View.GONE);
-                            serverListView.setVisibility(View.VISIBLE);
+                            //serverListView.setVisibility(View.VISIBLE);
                         }
                         serverList.add(data);
                         serversAdapter.notifyDataSetChanged();

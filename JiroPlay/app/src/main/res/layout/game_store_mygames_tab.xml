@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ListView
+        android:id="@+id/recentgames"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:divider="@null"
+        android:dividerHeight="0dp">
+
+
+    </ListView>
+
+    <ListView
+        android:id="@+id/paidgames"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:layout_below="@id/recentgames">
+
+
+    </ListView>
+
+</RelativeLayout>
