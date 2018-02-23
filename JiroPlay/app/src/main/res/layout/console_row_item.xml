@@ -14,19 +14,20 @@
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:layout_centerHorizontal="true"
-            android:layout_margin="14dp">
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
                 <TextView
-                    android:id="@+id/game_name"
+                    android:id="@+id/app_title"
                     android:textSize="22dp"
                     android:layout_margin="14dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="No Game" />
+                    android:text="No App" />
 
                 <TextView
                     android:id="@+id/pc_name"
@@ -47,12 +48,12 @@
                     android:layout_alignParentEnd="true" />
 
                 <Button
-                    android:id="@+id/game_button"
+                    android:id="@+id/start_app_button"
                     android:textSize="12dp"
                     android:layout_margin="4dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Start Game"
+                    android:text="Start App"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentEnd="true" />
 

@@ -1,6 +1,7 @@
 package com.example.dennis.testapp.SearchConsole;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,7 +52,7 @@ public class ConsoleListAdapter extends BaseAdapter {
         if (vi == null)
             vi = inflater.inflate(R.layout.console_row_item, null);
 
-        TextView gameName = (TextView) vi.findViewById(R.id.game_name);
+        TextView appTitle = (TextView) vi.findViewById(R.id.app_title);
         TextView pcName = (TextView) vi.findViewById(R.id.pc_name);
         TextView playerCount = (TextView) vi.findViewById(R.id.player_count);
 
@@ -59,14 +60,16 @@ public class ConsoleListAdapter extends BaseAdapter {
         String pcNameStr = data.get(position)[2];
         String playerCountStr = data.get(position)[3];
 
-        if (gameNameStr.equals("#no_game"))
+        Log.d("davidcal", gameNameStr);
+
+        if (gameNameStr.equals("NO_APP"))
         {
-            gameName.setText("No game");
-            playerCount.setText("Offline");
+            appTitle.setText("Choose an App");
+            playerCount.setText("");
         }
-        else if (gameNameStr.equals("#selecting"))
+        else if (gameNameStr.equals("SELECTING"))
         {
-            gameName.setText("Selecting game...");
+            appTitle.setText("Join server");
 
             if (playerCountStr == "1")
                 playerCount.setText(playerCountStr + " Player Waiting");
@@ -75,7 +78,7 @@ public class ConsoleListAdapter extends BaseAdapter {
         }
         else
         {
-            gameName.setText(gameNameStr);
+            appTitle.setText(gameNameStr.substring(1).replace("_", " "));
 
             if (playerCountStr == "1")
                 playerCount.setText(playerCountStr + " Player");

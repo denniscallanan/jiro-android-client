@@ -10,6 +10,7 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
@@ -17,14 +18,18 @@
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
 
-        <activity android:name=".SearchConsole.MainActivity">
+        <activity android:name=".SearchConsole.SearchConsole">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".GameStore.GameStore"></activity>
+        <activity android:name=".LocalApps.LocalApps" />
+        <activity
+            android:name=".ControllerScreen.ControllerScreen" />
+        <activity android:name=".AppStore.AppStore" />
+        <activity android:name=".SelectApp.SelectApp"></activity>
     </application>
 
 </manifest>
