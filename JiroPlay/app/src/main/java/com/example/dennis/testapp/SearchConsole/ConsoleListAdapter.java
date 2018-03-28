@@ -18,7 +18,7 @@ public class ConsoleListAdapter extends BaseAdapter {
 
     Context context;
     ArrayList<String[]> data;
-    private static LayoutInflater inflater = null;
+    private LayoutInflater inflater = null;
 
     public ConsoleListAdapter(Context context, ArrayList<String[]> data) {
         this.context = context;

@@ -1,5 +1,6 @@
 package com.example.dennis.testapp.XmlParser;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,6 +9,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.media.Image;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.constraint.ConstraintLayout;
 import android.view.Gravity;
 import android.view.View;
@@ -15,6 +17,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.example.dennis.testapp.GlobalService.GlobalService;
+import com.example.dennis.testapp.Singletons.RusSingleton;
 
 import org.jdom2.Attribute;
 import org.jdom2.Element;
@@ -30,17 +35,26 @@ public class ScreenPopulator {
     ConstraintLayout layout;
     Element controller;
     Context context;
+    Activity activity;
 
 
-    public ScreenPopulator(Element controller, int width, int height, ConstraintLayout layout, Context context){
+    public ScreenPopulator(Element controller, int width, int height, ConstraintLayout layout, Context context, Activity activity){
+
+        System.out.println("PopScreen constructor running");
 
         this.context = context;
         this.width = width;
         this.height = height;
         this.layout = layout;
         this.controller = controller;
+        this.activity = activity;
 
         searchChildren(null, controller, width, height, 0, 0);
+
+        //layout.invalidate();
+        //layout.notifyAll();
+
+        //layout.removeAllViews();
     }
 
     // Gets all properties / attributes of an XML Element in the form of a Hash Map
@@ -75,24 +89,30 @@ public class ScreenPopulator {
         Element finalChild = elem.getChildren().get(0);
         HashMap<String, String> attributeMap = getAttributeMap(finalChild);
 
+        String id = getAttributeMap(finalChild).get("id");
+
+        if(id == null){
+            id = GlobalService.getSaltString();
+        }
+
         switch(type){
 
             case "text":
                 drawText(parentLayout, parentWidth, parentHeight, elem.getValue(),
-                        attributeMap.get("size"), attributeMap.get("color"), attributeMap.get("weight"));
+                        attributeMap.get("size"), attributeMap.get("color"), attributeMap.get("weight"), id);
                 break;
 
             case "img":
-                drawImage(parentLayout, parentWidth, parentHeight, attributeMap.get("src"), attributeMap.get("scale"));
+                drawImage(parentLayout, parentWidth, parentHeight, attributeMap.get("src"), attributeMap.get("scale"), id);
                 break;
 
             case "button":
-                drawButton(parentLayout, parentWidth, parentHeight, attributeMap.get("text"));
+                drawButton(parentLayout, parentWidth, parentHeight, attributeMap.get("text"), id);
                 break;
 
             default:
                 drawText(parentLayout, parentWidth, parentHeight, "please use correct tag",
-                        "24", "#ffffff", "regular");
+                        "24", "#ffffff", "regular", "");
 
         }
 
@@ -134,7 +154,7 @@ public class ScreenPopulator {
 
             RelativeLayout newPartition = drawAndGetPartition(screenPartitions[i].x, screenPartitions[i].y, screenPartitions[i].width,
                     screenPartitions[i].height, screenPartitions[i].bgcolor, screenPartitions[i].bordersize,
-                    screenPartitions[i].bordercolor, children.get(i), screenPartitions[i].padding);
+                    screenPartitions[i].bordercolor, children.get(i), screenPartitions[i].padding, screenPartitions[i].id);
 
             int[] padding = screenPartitions[i].padding;
 
@@ -146,7 +166,7 @@ public class ScreenPopulator {
 
     // Draws row / column partition as a relative layout and returns it as a relative layout
     private RelativeLayout drawAndGetPartition(int x, int y, int width, int height, String bgcolor, int bordersize,
-                                               String bordercolor, Element elem, int[] pad){
+                                               String bordercolor, Element elem, int[] pad, String id){
 
         RelativeLayout partition = new RelativeLayout(this.context);
         partition.setBackgroundColor(Color.parseColor(bgcolor));
@@ -162,15 +182,17 @@ public class ScreenPopulator {
         partition.setY(y);
         partition.setMinimumHeight(height);
         partition.setMinimumWidth(width);
+        RusSingleton.getInstance().interactableViews.put(id, partition);
         layout.addView(partition);
 
         return partition;
     }
 
     // Draws text to screen, given text properties and parent layout
-    private void drawText(RelativeLayout parentPartition, int width, int height, String txt, String size, String color, String weight){
+    private void drawText(RelativeLayout parentPartition, int width, int height, String txt, String size, String color, String weight, String id){
 
         TextView tv = new TextView(this.context);
+        RusSingleton.getInstance().interactableViews.put(id, tv);
         parentPartition.addView(tv);
         addOrRemoveProperty(tv, RelativeLayout.CENTER_IN_PARENT, true);
         tv.setHeight(height);
@@ -194,7 +216,7 @@ public class ScreenPopulator {
     }
 
     // Draws image to screen, given image properties and parent layout
-    private void drawImage(RelativeLayout parentPartition, final int width, final int height, String src, String scale){
+    private void drawImage(RelativeLayout parentPartition, final int width, final int height, String src, String scale, String id){
 
 
         float toScale = 1;
@@ -203,7 +225,10 @@ public class ScreenPopulator {
 
         if(src != null){
 
+            final String s = src;
+
             final ImageView imgView = new ImageView(this.context);
+            RusSingleton.getInstance().interactableViews.put(id, imgView);
             final RelativeLayout boundingRect = parentPartition;
 
             imgView.setMaxWidth((int)(toScale*width));
@@ -211,39 +236,44 @@ public class ScreenPopulator {
             imgView.setMaxHeight((int)(toScale*height));
             imgView.setMinimumHeight((height));
 
-            new AsyncTask<String, Void, Bitmap>() {
+            new Thread(){
 
-                protected Bitmap  doInBackground(String... urls) {
-                    Bitmap image = null;
+                @Override
+                public void run(){
+
                     try {
-                        image = BitmapFactory.decodeStream(new URL(urls[0]).openConnection().getInputStream());
+                        final Bitmap image = BitmapFactory.decodeStream(new URL(s).openConnection().getInputStream());
+
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                imgView.setImageBitmap(image);
+                                imgView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                                boundingRect.addView(imgView);
+
+                                //imgView.setZ(10);
+
+                                addOrRemoveProperty(imgView, RelativeLayout.CENTER_IN_PARENT, true);
+                            }
+                        });
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    return image;
                 }
 
-                protected void onPostExecute(Bitmap result) {
 
-
-                    imgView.setImageBitmap(result);
-                    imgView.setAdjustViewBounds(true);
-                    boundingRect.addView(imgView);
-                    imgView.setZ(10);
-                    addOrRemoveProperty(imgView, RelativeLayout.CENTER_IN_PARENT, true);
-
-                }
-
-            }.execute(src);
+            }.start();
 
         }
 
     }
 
     // Draws button to screen, given text
-    public void drawButton(RelativeLayout parentPartition, int parentWidth, int parentHeight, String text){
+    public void drawButton(RelativeLayout parentPartition, int parentWidth, int parentHeight, String text, String id){
 
         Button button = new Button(this.context);
+        RusSingleton.getInstance().interactableViews.put(id, button);
         parentPartition.addView(button);
         addOrRemoveProperty(button, RelativeLayout.CENTER_IN_PARENT, true);
         button.setHeight(parentHeight);
@@ -260,6 +290,15 @@ public class ScreenPopulator {
             layoutParams.removeRule(property);
         }
         view.setLayoutParams(layoutParams);
+    }
+
+    public void removeChildViews(){
+        //GlobalService.removeAllChildViews(layout);
+        layout.removeAllViews();
+    }
+
+    public ConstraintLayout getLayout(){
+        return this.layout;
     }
 
 }

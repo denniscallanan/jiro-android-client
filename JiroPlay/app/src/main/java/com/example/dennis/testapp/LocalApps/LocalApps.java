@@ -39,7 +39,7 @@ public class LocalApps extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_local_apps);
 
-        RusSingleton.getInstance().setAppsActivity(this);
+
 
         Bundle extras = getIntent().getExtras();
         if(extras!=null) {
@@ -90,44 +90,40 @@ public class LocalApps extends AppCompatActivity {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-
-
-
-
     }
 
     @Override
     public void onBackPressed() {
 
-        RusSingleton.getInstance().setAppStoreSeen(false);
+        super.onBackPressed();
+
+        RusSingleton.getInstance().currentControllerData = "";
         RusSingleton.getInstance().getRusConsoleServer().close();
         RusSingleton.getInstance().setRusConsoleServer(null);
 
+        if(RusSingleton.getInstance().getRusAppServer() != null){
+            RusSingleton.getInstance().getRusAppServer().close();
+            RusSingleton.getInstance().setRusAppServer(null);
+        }
 
-        finish();
+        Intent i = new Intent(getApplicationContext(), SearchConsole.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);
     }
 
     @Override
     public void onDestroy(){
-
-        RusSingleton.getInstance().resetAppsList();
-
-
-        System.out.println("negro Destroying Local Apps");
-
-        //RusSingleton.getInstance().getRusConsoleServer().close();
-        //RusSingleton.getInstance().resetAppsList();
 
         super.onDestroy();
 
 
     }
 
+
     @Override
     public void onResume(){
         super.onResume();
-        RusSingleton.getInstance().setCurrentActivity("SelectApp");
-        System.out.println("negro Local Apps resuming");
+        RusSingleton.getInstance().setAppsActivity(this);
     }
 
 

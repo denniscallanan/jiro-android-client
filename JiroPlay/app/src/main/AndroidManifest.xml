@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
 
     <application
         android:allowBackup="true"
@@ -18,16 +19,17 @@
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
 
-        <activity android:name=".SearchConsole.SearchConsole">
+        <activity
+            android:name=".SearchConsole.SearchConsole">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity android:name=".LocalApps.LocalApps" />
         <activity
             android:name=".ControllerScreen.ControllerScreen" />
+
         <activity android:name=".AppStore.AppStore" />
         <activity android:name=".SelectApp.SelectApp"></activity>
     </application>

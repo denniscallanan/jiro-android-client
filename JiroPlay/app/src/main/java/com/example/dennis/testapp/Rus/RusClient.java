@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class RusClient {
@@ -34,8 +35,8 @@ public class RusClient {
     SLSocket socket;
     ListenerSocket bcastListener;
     int lastId;
-    HashMap<Integer, MessageInfoContainer> sentReliableMessages;
-    HashMap<Integer, MessageInfoContainer> receivedReliableMessages;
+    ConcurrentHashMap<Integer, MessageInfoContainer> sentReliableMessages;
+    ConcurrentHashMap<Integer, MessageInfoContainer> receivedReliableMessages;
 
 
     public RusClient(String serverIp, int serverPort){
@@ -92,6 +93,7 @@ public class RusClient {
 
                         int id = data[0];
                         sentReliableMessages.remove(id);
+                        Log.d("received", "msg receive");
 
                     }else if(headerBitsOneToTwo == RELIABLE_MESSAGE){
 
@@ -112,13 +114,9 @@ public class RusClient {
 
                         this.send(response, that.serverIp, that.serverPort);
 
-                        System.out.println("nigger " + id);
                         if(!receivedReliableMessages.containsKey(id) || !(Arrays.equals(receivedReliableMessages.get(id).message, data))){
-                            System.out.println("nigger didnt handle message yet");
-                            System.out.println(new String(data, Charset.forName("US-ASCII")));
-                            MessageInfoContainer mic = new MessageInfoContainer(1000, 0, data);
+                            MessageInfoContainer mic = new MessageInfoContainer(100, 0, data);
                             receivedReliableMessages.put(id, mic);
-                            //String transformedMessage = message.substring(0, message.indexOf('\0'));
                             that.onMessage(data);
                         }
 
@@ -137,18 +135,18 @@ public class RusClient {
 
         GlobalService.doTheTask(this.socket);
 
-        this.lastId = -1;
-
-        this.sentReliableMessages = new HashMap<Integer, MessageInfoContainer>();
-        this.receivedReliableMessages = new HashMap<Integer, MessageInfoContainer>();
-
         ByteManipulator header = new ByteManipulator();
         header.setBitToInt(0, NO_DATA);
         header.setBitRangeToInt(1, 7, CONNECT);
 
         this.socket.send(new byte[]{header.getByte()}, this.serverIp, this.serverPort);
 
-        new IntervalExecution(1){
+        this.lastId = -1;
+
+        this.sentReliableMessages = new ConcurrentHashMap<Integer, MessageInfoContainer>();
+        this.receivedReliableMessages = new ConcurrentHashMap<Integer, MessageInfoContainer>();
+
+        new IntervalExecution(10){
 
             @Override
             protected void onInterval(){
@@ -164,22 +162,11 @@ public class RusClient {
 
                     mic.millisToRetry--;
                     if(mic.millisToRetry <= 0){
-                        System.out.println("nigg removing id " + item.getKey());
                         it.remove();
                     }
-
-
                 }
-
-
-
-
             }
-
         }.execute();
-
-
-
     }
 
     public void resendMessages(){
@@ -190,22 +177,18 @@ public class RusClient {
             Map.Entry item = (Map.Entry) it.next();
 
             MessageInfoContainer mic = (MessageInfoContainer) item.getValue();
-            int id = (int) item.getKey();
 
             mic.millisToRetry--;
             if(mic.millisToRetry <= 0){
-                mic.millisToRetry = 3;
+                mic.millisToRetry = 1;
                 mic.remainingRetries--;
                 if(mic.remainingRetries <= 0){
                     it.remove();
                 }
+                Log.d("retrying", "k");
                 this.socket.send(mic.message, this.serverIp, this.serverPort);
             }
-
-
         }
-
-
     }
 
     public void send(byte[] data) {
@@ -230,7 +213,7 @@ public class RusClient {
         response[1] = (byte) msgId;
         for (int i = 0; i < data.length; i++)
             response[i + 2] = data[i];
-        this.sentReliableMessages.put(msgId, new MessageInfoContainer(3,5, response));
+        this.sentReliableMessages.put(msgId, new MessageInfoContainer(1,5, response));
         this.socket.send(response, this.serverIp, this.serverPort);
     }
 
@@ -249,10 +232,22 @@ public class RusClient {
     }
 
     public void close(){
-        this.socket.close();
-        this.socket = null;
-        if(this.bcastListener!=null)
+
+        Log.d("greg","Closing RUS");
+
+        ByteManipulator header =  new ByteManipulator();
+        header.setBitToInt(0,NO_DATA);
+        header.setBitRangeToInt(1,7, DISCONNECT);
+
+        this.socket.send(new byte[]{header.getByte()}, this.serverIp, this.serverPort);
+
+        if(this.socket != null) {
+            this.socket.close();
+        }
+        if(this.bcastListener != null) {
             this.bcastListener.close();
+        }
+        this.socket = null;
         this.bcastListener = null;
     }
 

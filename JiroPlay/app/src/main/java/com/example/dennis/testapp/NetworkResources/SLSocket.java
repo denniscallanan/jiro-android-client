@@ -10,14 +10,27 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 
 public class SLSocket extends AsyncTask<String, byte[], String>{
 
     DatagramSocket socket;
     Thread t;
+    int port;
 
     public SLSocket(int port){
+        this.port = port;
+
+        setupSocket(port);
+
+        if(this.socket == null){
+            setupSocket(port);
+        }
+    }
+
+    private void setupSocket(int port){
+
         try {
 
             this.socket = new DatagramSocket(null);
@@ -26,9 +39,13 @@ public class SLSocket extends AsyncTask<String, byte[], String>{
 
 
         } catch (Exception e) {
+            if(this.socket!=null){
+                this.socket.close();
+            }
             this.socket = null;
             e.printStackTrace();
         }
+
     }
 
 
@@ -39,39 +56,42 @@ public class SLSocket extends AsyncTask<String, byte[], String>{
         byte[] buffer;
         DatagramPacket packet;
 
-        Log.d("slsocket", "doing in background");
-
-        try
+        while (true)
         {
-            while (true)
-            {
-                Log.d("slsocket", "listening");
-                buffer = new byte[512];
-                packet = new DatagramPacket(buffer, buffer.length);
 
-                try {
-                    socket.receive(packet);
-                }catch (Exception e){
-                }
-                if(socket.isClosed()){
-                    break;
-                }
-
-                byte[] msg = packet.getData();
-                /*int i = msg.length - 1;
-                while (i >= 0 && msg[i] == 0)
-                    --i;
-
-                byte[] newMsg = Arrays.copyOf(msg, i + 1);*/
-                publishProgress(msg);
+            if(isCancelled()){
+                break;
             }
-            return null;
+
+            if(socket == null){
+                break;
+            }
+
+            buffer = new byte[1152];
+
+            try{
+                packet = new DatagramPacket(buffer, buffer.length);
+                socket.receive(packet);
+                byte[] msg = packet.getData();
+                publishProgress(msg);
+
+            }catch (Exception e){
+                if(socket != null){
+                    socket.close();
+                }
+            }
+            if(socket == null){
+                break;
+            }
+            if(socket.isClosed()){
+                break;
+            }
+
         }
-        catch (Exception e){
-            e.printStackTrace();
-        }
+        Log.d("ending", "Ending SL");
         return null;
     }
+
 
     @Override
     protected void onProgressUpdate(byte[]... values) {
@@ -83,44 +103,60 @@ public class SLSocket extends AsyncTask<String, byte[], String>{
     }
 
     public void close(){
+        Log.d("closing", "closing SL");
+        this.cancel(true);
         this.socket.close();
         this.socket = null;
-        this.cancel(true);
     }
 
 
-    public void send(byte[] message, String ip, int port){
+    public void send(final byte[] message, final String ip, final int port){
 
-        Log.d("send", "sending " + message);
+        final DatagramPacket packet;
+        final SLSocket that = this;
+
+        final int p = this.port;
 
         try {
+            packet = new DatagramPacket(message, message.length, InetAddress.getByName(ip), port);
+        } catch (UnknownHostException e) {
+            return;
+        }
 
-
-            final DatagramPacket packet = new DatagramPacket(message, message.length, InetAddress.getByName(ip), port);
-
-            t = new Thread(new Runnable() {
+        t = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        socket.send(packet);
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if(socket != null){
+
+                        try {
+                            socket.send(packet);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }finally {
+                            if(t!=null){
+                                t.interrupt();
+                            }
+                        }
+
+                    }else{
+
+                        setupSocket(p);
+                        //that.send(message, ip, port);
+
+
                     }
-                    finally {
-                        t.interrupt();
-                    }
+
                 }
             });
 
-
+        try {
             t.start();
+        }catch(Exception e){
 
-        }catch (Exception e){
-            e.printStackTrace();
         }
-
     }
+
 
 
 }

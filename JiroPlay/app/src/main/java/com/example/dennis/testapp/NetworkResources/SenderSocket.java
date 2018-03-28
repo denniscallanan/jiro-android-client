@@ -12,6 +12,7 @@ import java.net.SocketException;
 public class SenderSocket{
 
     DatagramSocket socket;
+    Thread t;
 
     public SenderSocket() {
 
@@ -20,6 +21,10 @@ public class SenderSocket{
             this.socket.setReuseAddress(true);
 
         } catch (SocketException e) {
+            if(this.socket!=null){
+                this.socket.close();
+            }
+            this.socket = null;
             e.printStackTrace();
         }
 
@@ -35,14 +40,16 @@ public class SenderSocket{
 
             final DatagramPacket packet = new DatagramPacket(message, message.length, InetAddress.getByName(ip), port);
 
-            Thread t = new Thread(new Runnable() {
+            t = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         socket.send(packet);
-
                     } catch (IOException e) {
                         e.printStackTrace();
+                    }finally{
+                        Log.d("ending", "Ending SenderSocket thread");
+                        t.interrupt();
                     }
                 }
             });

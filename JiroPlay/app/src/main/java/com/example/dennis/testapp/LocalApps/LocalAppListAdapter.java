@@ -38,13 +38,22 @@ public class LocalAppListAdapter extends RecyclerView.Adapter<LocalAppListAdapte
             ratingValText = (TextView) view.findViewById(R.id.rating_val);
             holderView = view;
 
+
+
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     RusSingleton.getInstance().getRusConsoleServer().sendr(("app start " + localAppList.get(getAdapterPosition()).id).getBytes(Charset.forName("US-ASCII")));
 
+                    if (!RusSingleton.getInstance().getActivityString().equals("ControllerScreen")) {
+
+                        RusSingleton.getInstance().getAppsActivity().finish();
+
+                    }
                 }
             });
+
+
 
 
 

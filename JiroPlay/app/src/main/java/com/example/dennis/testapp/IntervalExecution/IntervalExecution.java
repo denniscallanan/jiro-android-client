@@ -1,5 +1,7 @@
 package com.example.dennis.testapp.IntervalExecution;
 
+import android.util.Log;
+
 /**
  * Created by Dennis on 23/12/2017.
  */
@@ -7,6 +9,7 @@ package com.example.dennis.testapp.IntervalExecution;
 public class IntervalExecution {
 
     private final int milliseconds;
+    Thread t;
 
     public IntervalExecution(int milliseconds){
 
@@ -17,22 +20,25 @@ public class IntervalExecution {
 
         final int milliseconds = this.milliseconds;
 
-        Thread t = new Thread(new Runnable() {
+        t = new Thread(new Runnable() {
             @Override
             public void run() {
-                long lastTime = System.nanoTime();
 
                 while(true){
 
-                    long currentTime = System.nanoTime();
-
-                    if(currentTime - lastTime  > milliseconds*1000000) {
-                        lastTime = currentTime;
-                        onInterval();
+                    try {
+                        t.sleep(milliseconds);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        continue;
                     }
+
+                    onInterval();
+
                 }
             }
         });
+        Log.d("starting", "interval start");
         t.start();
     }
 

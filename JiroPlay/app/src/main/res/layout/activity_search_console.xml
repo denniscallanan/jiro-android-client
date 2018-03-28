@@ -43,9 +43,29 @@
             android:id="@+id/login_button"
             android:layout_width="wrap_content"
             android:layout_height="20dp"
-            android:layout_centerHorizontal="true"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            />
+
+        <EditText
+            android:id="@+id/name_text_view"
+            android:maxLines="1"
+            android:inputType="text"
+            android:gravity="center_vertical"
+            android:textColor="#ffffff"
+            android:hint="Type your Name"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@id/login_button"
+            android:layout_marginLeft="5dp"
+            android:layout_marginBottom="3dp"
+            android:textSize="12dp"
+            android:layout_marginRight="5dp"
+
+            />
 
 
     </RelativeLayout>

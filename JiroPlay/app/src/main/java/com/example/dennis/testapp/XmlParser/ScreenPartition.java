@@ -1,6 +1,9 @@
 package com.example.dennis.testapp.XmlParser;
 
+import com.example.dennis.testapp.GlobalService.GlobalService;
+
 import java.util.HashMap;
+import java.util.Random;
 
 /**
  * Created by Dennis on 29/01/2018.
@@ -17,6 +20,7 @@ public class ScreenPartition {
     int bordersize;
     String bordercolor;
     int[] padding = {0,0,0,0};
+    String id = "";
 
     public ScreenPartition(HashMap<String, String> attributeMap){
 
@@ -32,7 +36,7 @@ public class ScreenPartition {
             this.bgcolor = "#ffffff";
         if(attributeMap.get("bordersize") != null){
             this.bordersize = Integer.parseInt(attributeMap.get("bordersize"));
-            if(bordercolor == null){
+            if(attributeMap.get("bordercolor") == null){
                 this.bordercolor = "#000000";
             }else{
                 this.bordercolor = attributeMap.get("bordercolor");
@@ -53,6 +57,13 @@ public class ScreenPartition {
                 for (int pad = 0; pad < 4; pad++)
                     padding[pad] = Integer.parseInt(paddy[0]);
         }
+
+        if(attributeMap.get("id") != null){
+            this.id = attributeMap.get("id");
+        }else{
+            this.id = GlobalService.getSaltString();
+        }
+
 
     }
 
@@ -75,6 +86,7 @@ public class ScreenPartition {
     public void setY(int y) {
         this.y = y;
     }
+
 
 
 }

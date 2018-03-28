@@ -1,6 +1,8 @@
 package com.example.dennis.testapp.Singletons;
 
 import android.app.Activity;
+import android.util.Log;
+import android.view.View;
 
 import com.example.dennis.testapp.AppStore.AppStoreListAdapter;
 import com.example.dennis.testapp.AppStore.StoreAppInfo;
@@ -8,32 +10,45 @@ import com.example.dennis.testapp.LocalApps.LocalAppInfo;
 import com.example.dennis.testapp.LocalApps.LocalAppListAdapter;
 import com.example.dennis.testapp.Rus.RusClient;
 import com.example.dennis.testapp.SelectApp.App;
+import com.example.dennis.testapp.XmlParser.ScreenPopulator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Dennis on 12/02/2018.
  */
 
 public class RusSingleton {
-    private static final RusSingleton instance = new RusSingleton();
 
+    public static int accelerometerSendCounter = 0;
+    private static final RusSingleton instance = new RusSingleton();
     private static RusClient rusConsoleServer;
+    private static RusClient rusAppServer;
+    private static Activity appsActivity;
+    private static boolean inCharge = false;
+    private static boolean appStoreSeen = false;
+    private static int i = 0;
+    public String currentControllerData = "";
+    public HashMap<String, View> interactableViews = new HashMap<>();
+    public HashMap<String, ArrayList<String>> eventsList = new HashMap<>();
+    public String controllerId = "noid";
+    public boolean sendAccelerometerData = false;
+    public ScreenPopulator controllerPop;
+    private static ArrayList<LocalAppInfo> apps = new ArrayList<>();
+    private static LocalAppListAdapter appsAdapter = new LocalAppListAdapter(apps);
+
+
+    private RusSingleton() {
+    }
 
     public static RusClient getRusAppServer() {
         return rusAppServer;
     }
 
-    public static void setRusAppServer(RusClient rusGamesServer) {
+    public static void setRusAppServer(RusClient rusAppServer) {
         RusSingleton.rusAppServer = rusAppServer;
     }
-
-    private static RusClient rusAppServer;
-    private static int i = 0;
-
-    private static String currentActivity = "";
-
-    private static boolean inCharge = false;
 
     public static Activity getAppsActivity() {
         return appsActivity;
@@ -43,11 +58,6 @@ public class RusSingleton {
         RusSingleton.appsActivity = appsActivity;
     }
 
-    private static Activity appsActivity;
-
-    public static String getUnderProgressString() {
-        return underProgressString;
-    }
 
     public static void putInCharge(){
         inCharge = true;
@@ -61,22 +71,9 @@ public class RusSingleton {
         return inCharge;
     }
 
-    public static void setUnderProgressString(String underProgressString) {
-        RusSingleton.underProgressString = underProgressString;
-    }
-
-    private static String underProgressString = "";
-
-    private static boolean appStoreSeen = false;
-
-    private static boolean rusSetup = false;
-
-    private static ArrayList<LocalAppInfo> apps = new ArrayList<>();
-
-    private static LocalAppListAdapter appsAdapter = new LocalAppListAdapter(apps);
-
     public static void setRusConsoleServer(RusClient rc){
         rusConsoleServer = rc;
+        Log.d("consoleServer", "new console server");
     }
 
     public static RusClient getRusConsoleServer(){
@@ -84,7 +81,7 @@ public class RusSingleton {
     }
 
     public static void resetAppsList(){
-        apps = new ArrayList<>();
+        apps.clear();
         appsAdapter.notifyDataSetChanged();
     }
 
@@ -113,10 +110,6 @@ public class RusSingleton {
         appsAdapter.notifyDataSetChanged();
     }
 
-    public static ArrayList<LocalAppInfo> getAppsList(){
-        return apps;
-    }
-
     public static LocalAppListAdapter getAppsAdapter(){
         return appsAdapter;
     }
@@ -129,22 +122,22 @@ public class RusSingleton {
         appStoreSeen = x;
     }
 
-    private RusSingleton() {
+    public static String getActivityString(){
+        return appsActivity.getClass().getSimpleName();
     }
 
-    public static void setupRus(){
-        rusSetup = true;
+    public static boolean hasApp(String s){
+
+        boolean hasApp = false;
+
+        for(LocalAppInfo app: apps){
+            if(app.getId().equals(s)){
+                hasApp = true;
+            }
+        }
+        return hasApp;
+
     }
 
-    public static boolean isRusSetup(){
-        return rusSetup;
-    }
 
-    public static String getCurrentActivity(){
-        return currentActivity;
-    }
-
-    public static void setCurrentActivity(String s){
-        currentActivity = s;
-    }
 }
