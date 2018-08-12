@@ -80,8 +80,6 @@ public class ControllerScreen extends AppCompatActivity implements SensorEventLi
 
     ConstraintLayout controllerLayout;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,7 +91,6 @@ public class ControllerScreen extends AppCompatActivity implements SensorEventLi
         Log.d("oncreate", "ControllerScreen");
 
         controllerLayout = findViewById(R.id.controller_layout);
-
 
         ViewTreeObserver vto = controllerLayout.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -536,27 +533,27 @@ public class ControllerScreen extends AppCompatActivity implements SensorEventLi
 
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER && RusSingleton.getInstance().sendAccelerometerData) {
 
-            float ax = sensorEvent.values[0];
-            float ay = sensorEvent.values[1];
-            float az = sensorEvent.values[2];
+            float accelX = sensorEvent.values[0];
+            float accelY = sensorEvent.values[1];
+            float accelZ = sensorEvent.values[2];
 
             //Log.d("accel",ax+","+ay+","+az);
 
-            float dx_perc = abs(ax-currentX);
-            float dy_perc = abs(ay-currentY);
-            float dz_perc = abs(az-currentZ);
+            float dx_perc = abs(accelX-currentX);
+            float dy_perc = abs(accelY-currentY);
+            float dz_perc = abs(accelZ-currentZ);
 
             if(dx_perc + dy_perc + dz_perc > 0.5 && System.nanoTime() - lastTime > 100000000) {
 
                 lastTime = System.nanoTime();
 
-                currentX = ax;
-                currentY = ay;
-                currentZ = az;
+                currentX = accelX;
+                currentY = accelY;
+                currentZ = accelZ;
 
                 if (RusSingleton.getInstance().getRusAppServer() != null) {
-                    RusSingleton.getInstance().getRusAppServer().send(("a" + RusSingleton.getInstance().controllerId + "^" + ax + "," +
-                            ay + "," + az).getBytes(Charset.forName("US-ASCII")));
+                    RusSingleton.getInstance().getRusAppServer().send(("a" + RusSingleton.getInstance().controllerId + "^" + accelX + "," +
+                            accelY + "," + accelZ).getBytes(Charset.forName("US-ASCII")));
                 }
 
                 RusSingleton.getInstance().accelerometerSendCounter++;
